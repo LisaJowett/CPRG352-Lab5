@@ -10,7 +10,7 @@ import javax.servlet.http.HttpSession;
 
 /**
  *
- * @author lisaj
+ * @author Lisa Jowett
  */
 public class ShoppingListServlet extends HttpServlet 
 {
@@ -30,17 +30,22 @@ public class ShoppingListServlet extends HttpServlet
 
         String name = (String)session.getAttribute("name");
 
-        if (name == null)
+        if(name != null)
         {
-            getServletContext().getRequestDispatcher("WEB-INF/register.jsp").forward(request, response);
+            String query = request.getQueryString();
+
+        if(query != null && query.contains("logout"))
+        {
+            session.invalidate();
+            request.setAttribute("message", "You are logged out!");
         }
         else
         {
-            getServletContext().getRequestDispatcher("WEB-INF/shoppingList.jsp").forward(request, response);
+            response.sendRedirect("shoppingList");
+            return;
         }
-
-        getServletContext().getRequestDispatcher("/WEB-INF/register.jsp").forward(request, response);
-        //getServletContext().getRequestDispatcher("/WEB-INF/shoppingList.jsp").forward(request, response);
+        }
+            getServletContext().getRequestDispatcher("/WEB-INF/register.jsp").forward(request, response);   
     }
 
     /**
@@ -57,12 +62,6 @@ public class ShoppingListServlet extends HttpServlet
     {
         HttpSession session = request.getSession();
 
-        if (session.getAttribute("name") == null)
-        {
-            getServletContext().getRequestDispatcher("WEB-INF/register.jsp").forward(request, response);
-            return;
-        }
-
         String action = request.getParameter("action");
 
         if(action != null && action.equals("add"))
@@ -73,6 +72,15 @@ public class ShoppingListServlet extends HttpServlet
 
             items.add(item);
             session.setAttribute("items", items);
+        }
+        else if(action != null && action.equals("delete"))
+        {
+            String item = request.getParameter("item");
+
+            ArrayList<String> items = (ArrayList<String>) session.getAttribute("items");
+
+            items.remove(item);
+            
         }
         else
         {
